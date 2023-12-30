@@ -1,0 +1,100 @@
+<!-- bot/templates/bot/chat.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        #chat-container {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #chat-display {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+        }
+
+        #user-input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #submit-btn {
+            width: 18%;
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #output-field {
+            margin-top: 10px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-display" placeholder="Chat history will appear here"></div>
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button type="button" id="submit-btn" onclick="submitForm()">Send</button>
+        </form>
+        <div id="output-field"></div>
+    </div>
+
+    <script>
+        async function submitForm() {
+            var userInput = document.getElementById('user-input').value;
+            var chatDisplay = document.getElementById('chat-display');
+            var outputField = document.getElementById('output-field');
+
+            // Display user input in the chat history
+            chatDisplay.innerHTML += '<div>User: ' + userInput + '</div>';
+
+            // Make an asynchronous request to the server to get the chatbot response
+            var response = await fetch('/bot/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: 'user_input=' + encodeURIComponent(userInput),
+            });
+
+            var responseData = await response.json();
+            var chatbotResponse = responseData.response;
+
+            // Display chatbot response in the chat history
+            chatDisplay.innerHTML += '<div>Chatbot: ' + chatbotResponse + '</div>';
+
+            // Display chatbot response in the output field
+            outputField.innerHTML = '<p>' + chatbotResponse + '</p>';
+
+            // Clear user input
+            document.getElementById('user-input').value = '';
+        }
+    </script>
+</body>
+</html>
